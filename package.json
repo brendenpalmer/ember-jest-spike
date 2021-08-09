@@ -4,5 +4,8 @@
   "main": "index.js",
   "repository": "https://github.com/brendenpalmer/ember-jest-spike",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
 }
