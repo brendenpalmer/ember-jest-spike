@@ -1,57 +1,55 @@
-import { getOwner } from '@ember/application';
-import { VERSION } from '@ember/version';
-import { computed, get } from '@ember/object';
-import Component from '@ember/component';
-import layout from '../templates/components/welcome-page';
-import { gte } from 'ember-compatibility-helpers';
+import { getOwner } from "@ember/application";
+import { VERSION } from "@ember/version";
+import { computed, get } from "@ember/object";
+import Component from "@ember/component";
+import { inject as service } from "@ember/service";
+import layout from "../templates/components/welcome-page";
 
 export default Component.extend({
   layout,
 
-  isCurrent: computed(function() {
+  fastboot: service("fastboot"),
+
+  isCurrent: computed(function () {
     let displayCurrent = false;
     let version = VERSION;
     let patch = version.split(".")[2];
 
-    if (version === 'master') {
+    if (version === "master") {
       displayCurrent = true;
-    } else if (patch.match('alpha')) {
+    } else if (patch.match("alpha")) {
       displayCurrent = true;
-    } else if (patch.match('beta')) {
+    } else if (patch.match("beta")) {
       displayCurrent = true;
     }
 
     return displayCurrent;
   }),
 
-  canAngleBracket: computed(function() {
-    return gte('3.4.0');
-  }),
-
-  isModuleUnification: computed(function() {
-    const config = getOwner(this).resolveRegistration('config:environment');
+  isModuleUnification: computed(function () {
+    const config = getOwner(this).resolveRegistration("config:environment");
 
     return config && config.isModuleUnification;
   }),
 
-  rootURL: computed(function() {
-    let config = getOwner(this).factoryFor('config:environment');
+  rootURL: computed(function () {
+    let config = getOwner(this).factoryFor("config:environment");
 
     if (config) {
       return config.class.rootURL;
     } else {
-      return '/';
+      return "/";
     }
   }),
 
-  emberVersion: computed('isCurrent', function() {
-    let isCurrent = get(this, 'isCurrent');
+  emberVersion: computed("isCurrent", function () {
+    let isCurrent = get(this, "isCurrent");
 
     if (isCurrent) {
-      return 'current';
+      return "current";
     } else {
-      let [ major, minor ] = VERSION.split(".");
+      let [major, minor] = VERSION.split(".");
       return `${major}.${minor}.0`;
     }
-  })
+  }),
 });

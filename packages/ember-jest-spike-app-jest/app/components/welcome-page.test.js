@@ -1,97 +1,99 @@
-import { hbs } from "ember-cli-htmlbars";
+const { precompile } = require("ember-source/dist/ember-template-compiler");
 
-debugger;
+const Component = require("@glimmer/component");
+const SimpleDOM = require("simple-dom");
+const { JSDOM } = require("jsdom");
+const FastBoot = require("fastboot");
+const path = require("path");
 
-describe("Integration | Component | welcome page", function (hooks) {
-  beforeEach(async () => {
-    const page = await browser.newPage();
-    await page.goto("http://localhost:4200/tests");
+console.log(precompile(`<WelcomePage/>`));
 
-    await jestPuppeteer.debug();
-  }, 100000000);
+const fastBoot = new FastBoot({
+  distPath: path.resolve(__dirname, "..", "..", "dist"),
+});
 
+class FastBootInfo {
+  constructor() {
+    this.deferredPromise = Promise.resolve();
+
+    this.request = {
+      method: "GET",
+      body: "",
+      cookies: {},
+      headers: {},
+      queryParams: {},
+      path: "/",
+      protocol: "http",
+      host: function () {
+        return "localhost";
+      },
+    };
+  }
+
+  deferRendering(promise) {
+    this.deferredPromise = Promise.all([this.deferredPromise, promise]);
+  }
+
+  /*
+   * Registers this FastBootInfo instance in the registry of an Ember
+   * ApplicationInstance. It is configured to be injected into the FastBoot
+   * service, ensuring it is available inside instance initializers.
+   */
+  register(instance) {
+    instance.register("info:-fastboot", this, { instantiate: false });
+    instance.inject("service:fastboot", "_fastbootInfo", "info:-fastboot");
+  }
+}
+
+const fastbootInfo = new FastBootInfo();
+
+function buildBootOptions(shouldRender) {
+  let doc = new JSDOM("<div></div>");
+  let rootElement = doc.body;
+  let _renderMode = process.env.EXPERIMENTAL_RENDER_MODE_SERIALIZE
+    ? "serialize"
+    : undefined;
+
+  return {
+    isBrowser: false,
+    document: doc.window.document,
+    rootElement,
+    shouldRender,
+    _renderMode,
+  };
+}
+
+describe("Integration | Component | welcome page", function () {
   it("it links to version for release version", async function () {
-    const {
-      render,
-      setupRenderingContext,
-      teardownRenderingContext,
-    } = require("@ember/test-helpers");
+    let bootOptions = buildBootOptions(true);
+    let shouldBuildApp = fastBoot._app._applicationInstance === undefined;
 
-    setupRenderingContext();
+    let { app, isSandboxPreBuilt } = shouldBuildApp
+      ? await fastBoot._app.getNewApplicationInstance()
+      : fastBoot._app.getAppInstanceInfo(fastBoot._app._applicationInstance);
 
-    // Set any properties with this.set('myProperty', 'value');
-    // Handle any actions with this.on('myAction', function(val) { ... });
-    Ember.VERSION = "3.1.5";
+    await app.boot();
+
+    let instance = await app.buildInstance();
+
+    fastbootInfo.register(instance);
+
+    await instance.boot(bootOptions);
+
+    console.log(Component);
+
+    debugger;
+    instance.register(
+      "component:custom-thing",
+      class extends Component.default {
+        template = precompile(`<WelcomePage/>`);
+      }
+    );
+
+    const component = instance.lookup("component:story-mode");
 
     debugger;
 
-    await render(hbs`<WelcomePage/>`);
-
-    let [emberMajor, emberMinor] = Ember.VERSION.split(".");
-    let [welcomeMajor, welcomeMinor, welcomePatch] = this.element
-      .querySelector("[data-ember-version]")
-      .dataset.emberVersion.split(".");
-
-    assert.equal(
-      emberMajor,
-      welcomeMajor,
-      "Major segment of version should match."
-    );
-    assert.equal(
-      emberMinor,
-      welcomeMinor,
-      "Minor segment of version should match."
-    );
-    assert.equal("0", welcomePatch, "Patch segment of version should be 0.");
-
-    teardownRenderingContext();
+    console.log(fastBoot._app, isSandboxPreBuilt);
   });
-
-  // it('it links to "/current" for alpha versions', async function (assert) {
-  //   // Set the version property
-  //   Ember.VERSION = "2.15.0-alpha.1";
-
-  //   await render(hbs`<WelcomePage/>`);
-
-  //   let versionText = this.element.querySelector("[data-ember-version]").dataset
-  //     .emberVersion;
-
-  //   assert.equal(
-  //     versionText,
-  //     "current",
-  //     "Version text should be set to 'current' when an alpha version is used."
-  //   );
-  // });
-
-  // it('it links to "/current" for beta versions', async function (assert) {
-  //   // Set the version property
-  //   Ember.VERSION = "2.15.0-beta.1";
-
-  //   await render(hbs`<WelcomePage/>`);
-
-  //   let versionText = this.element.querySelector("[data-ember-version]").dataset
-  //     .emberVersion;
-
-  //   assert.equal(
-  //     versionText,
-  //     "current",
-  //     "Version text should be set to 'current' when a beta version is used."
-  //   );
-  // });
-
-  // it('it links to "/current" for master', async function (assert) {
-  //   // Set the version property
-  //   Ember.VERSION = "master";
-
-  //   await render(hbs`<WelcomePage/>`);
-
-  //   let versionText = this.element.querySelector("[data-ember-version]").dataset
-  //     .emberVersion;
-
-  //   assert.equal(
-  //     versionText,
-  //     "current",
-  //     "Version text should be set to 'current' when master is used."
-  //   );
-  // });
 });

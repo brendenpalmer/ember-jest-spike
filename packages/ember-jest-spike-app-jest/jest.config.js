@@ -6,7 +6,6 @@ module.exports = {
   transform: {
     "\\.[jt]sx?$": "babel-jest",
   },
-  globalSetup: "<rootDir>/jest-setup.js",
   testEnvironment: "./custom-environment.js",
   testMatch: ["**/*.test.js"],
 };

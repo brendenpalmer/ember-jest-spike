@@ -27,6 +27,8 @@
     "@babel/runtime": "^7.14.8",
     "@ember/optional-features": "^2.0.0",
     "@ember/test-helpers": "^2.2.5",
+    "@glimmer/application": "^1.0.4",
+    "@glimmer/bundle-compiler": "^0.56.2",
     "@glimmer/component": "^1.0.4",
     "@glimmer/tracking": "^1.0.4",
     "babel-eslint": "^10.1.0",
@@ -37,10 +39,12 @@
     "ember-cli-app-version": "^5.0.0",
     "ember-cli-babel": "^7.26.6",
     "ember-cli-dependency-checker": "^3.2.0",
+    "ember-cli-fastboot": "^2.2.3",
     "ember-cli-htmlbars": "^5.7.1",
     "ember-cli-inject-live-reload": "^2.0.2",
     "ember-cli-sri": "^2.1.1",
     "ember-cli-terser": "^4.0.2",
+    "ember-compatibility-helpers": "^1.2.5",
     "ember-data": "~3.27.1",
     "ember-export-application-global": "^2.0.1",
     "ember-fetch": "^8.0.4",
@@ -67,5 +71,8 @@
   },
   "ember": {
     "edition": "octane"
+  },
+  "dependencies": {
+    "fastboot": "^3.1.2"
   }
 }
