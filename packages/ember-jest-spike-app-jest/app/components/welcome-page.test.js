@@ -1,5 +1,7 @@
 const { precompile } = require("ember-source/dist/ember-template-compiler");
 
+const { precompileJSON } = require("@glimmer/compiler");
+const { templateFactory } = require("@glimmer/opcode-compiler");
 const Component = require("@glimmer/component");
 const SimpleDOM = require("simple-dom");
 const { JSDOM } = require("jsdom");
@@ -80,18 +82,17 @@ describe("Integration | Component | welcome page", function () {
 
     await instance.boot(bootOptions);
 
-    console.log(Component);
+    console.log(Component, precompileJSON, templateFactory);
 
-    debugger;
     instance.register(
-      "component:custom-thing",
-      class extends Component.default {
-        template = precompile(`<WelcomePage/>`);
-      }
+      "template:components/custom-thing",
+      templateFactory(JSON.parse(precompile(`<WelcomePage/>`)))
     );
 
-    const component = instance.lookup("component:story-mode");
+    const component = instance.lookup("template:components/custom-thing");
 
+    debugger;
+    component.appendTo(bootOptions.document.body);
     debugger;
 
     console.log(fastBoot._app, isSandboxPreBuilt);
